@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Simple Chatroom by Firebase</title>
+	<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="author" content="Paolovelove">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link href="jumbotron-narrow.css" rel="stylesheet">
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+
+    <div class="container">
+      	<div class="header clearfix">
+        	<nav>
+         		<ul class="nav nav-pills pull-right">
+            		<li role="presentation"><a href="#">Github</a></li>
+            		<li role="presentation"><a href="#">Firebase</a></li>
+          		</ul>
+        	</nav>
+        	<h3 class="text-muted">Simple Chatroom <small>by Firebase</small></h3>
+      	</div>
+
+		<div class="jumbotron" id="chatlog">
+		</div>
+
+      	<div class="row content">
+      		<form action="javascript:void(0);" method="POST" role="form">
+	      		<input id="username" type="hidden">
+      			<div class="form-group">
+	      			<div class="input-group">
+					  	<span class="input-group-addon" id="username-label" onclick="javascript:usernameChange();" data-toggle="tooltip" data-placement="top" title="Click to change">@</span>
+					  	<input id="text"  type="text" class="form-control" placeholder="Message" aria-describedby="username-label" autocomplete="off" autofocus="">
+					</div>
+      			</div>
+				<button id="post" type="submit" class="btn btn-primary pull-right" data-toggle="tooltip" data-placement="bottom" title="You can press enter to send as well!">Send</button>
+      		</form>
+      	</div>
+      <footer class="footer">
+        <p>&copy; 2017 Chalermpon Thongmotai</p>
+      </footer>
+    </div> 
+
+	<script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+	
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+	<script>
+		var username = $('#username');
+		var text = $('#text');
+
+		function clearText(){
+			text.val('');
+		}
+
+		function usernameCheck(){
+			if(username.val() == ''){
+				username.val(prompt("Plese enter your name"));
+			}
+			if(username.val() == ''){
+				username.val('anonymous');
+			}
+			$('#username-label').text('@'+username.val());
+		}
+
+		function usernameChange(){
+			username.val(prompt("Plese enter your name",username.val()));
+			if(username.val() == ''){
+				username.val('anonymous');
+			}
+			$('#username-label').text('@'+username.val());
+		}
+
+		function scrollTop(){
+			$('#chatlog').animate({
+   				scrollTop: $('#chatlog').get(0).scrollHeight}, 200); 
+		}
+
+		$(document).ready(function() {
+			scrollTop();
+			clearText();
+			usernameCheck();
+			$('[data-toggle="tooltip"]').tooltip();
+			$('#post').click(function() {
+				usernameCheck();
+				writeData(username.val(), text.val())
+			});
+		});
+	</script>
+
+	<script src="https://www.gstatic.com/firebasejs/4.3.1/firebase.js"></script>
+	<script src="firebaseConfig.js"></script>
+	<script>
+		firebase.initializeApp(config);
+		var chatroom = firebase.database().ref('chatroom');
+
+		function writeData(username, text) {
+			if(username != '' && text != '')
+				{
+				chatroom.push({
+					username: username,
+					text: text
+			  	});
+				clearText();
+				}
+		}
+		chatroom.limitToLast(10).on('child_added', function(data){
+			var chat = data.val();
+			$('#chatlog').append("<p><strong>"+chat.username+"</strong>: "+chat.text+"</p>");
+			scrollTop();
+		});
+	</script>
+
+</body>
+</html>
