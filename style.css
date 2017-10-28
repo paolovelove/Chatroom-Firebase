@@ -68,6 +68,16 @@ body {
   margin-top: 28px;
 }
 
+/* Google sign in btn */
+.btn-google{
+  background-color: #c23321;
+  color: #fff;
+}
+.btn-google:hover{
+  background-color: #9c2617;
+  color: #fff;
+}
+
 /* Responsive: Portrait tablets and up */
 @media screen and (min-width: 768px) {
   /* Remove the padding we set earlier */

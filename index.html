@@ -7,7 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="author" content="Paolovelove">
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    <link href="jumbotron-narrow.css" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -24,6 +24,7 @@
          		<ul class="nav nav-pills pull-right">
             		<li role="presentation"><a href="https://github.com/paolovelove/Chatroom-Firebase" target="_blank">Github</a></li>
             		<li role="presentation"><a href="https://firebase.google.com/" target="_blank">Firebase</a></li>
+            		<li role="presentation"><a href="javascript:void(0);" onclick="logout();" class="text-danger">Logout</a></li>
           		</ul>
         	</nav>
         	<h3 class="text-muted">Simple Chatroom <small>by Firebase</small></h3>
@@ -44,6 +45,7 @@
 				<button id="post" type="submit" class="btn btn-primary pull-right" data-toggle="tooltip" data-placement="bottom" title="You can press enter to send as well!">Send</button>
       		</form>
       	</div>
+
       <footer class="footer">
         <p>&copy; 2017 Chalermpon Thongmotai</p>
       </footer>
@@ -84,23 +86,14 @@
    				scrollTop: $('#chatlog').get(0).scrollHeight}, 200); 
 		}
 
-		$(document).ready(function() {
-			scrollTop();
-			clearText();
-			usernameCheck();
-			$('[data-toggle="tooltip"]').tooltip();
-			$('#post').click(function() {
-				usernameCheck();
-				writeData(username.val(), text.val())
-			});
-		});
 	</script>
 
-	<script src="https://www.gstatic.com/firebasejs/4.3.1/firebase.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/4.5.0/firebase.js"></script>
 	<script src="firebaseConfig.js"></script>
 	<script>
 		firebase.initializeApp(config);
 		var chatroom = firebase.database().ref('chatroom');
+		var auth = firebase.auth();
 
 		function writeData(username, text) {
 			if(username != '' && text != '')
@@ -112,11 +105,39 @@
 				clearText();
 				}
 		}
+
 		chatroom.limitToLast(10).on('child_added', function(data){
 			var chat = data.val();
 			$('#chatlog').append("<p><strong>"+chat.username+"</strong>: "+chat.text+"</p>");
 			scrollTop();
 		});
+
+	function logout() {
+		auth.signOut().then(function() {
+			$('body').html('');
+		});
+	}
+
+	function init() {
+		auth.onAuthStateChanged(function(user) {
+			if (!user) {
+				window.location.replace("login.html"); 
+			}
+			else {
+				scrollTop();
+				clearText();
+				usernameCheck();
+				$('[data-toggle="tooltip"]').tooltip();
+				$('#post').click(function() {
+					usernameCheck();
+					writeData(username.val(), text.val())
+				});
+			}
+		});
+	}
+	$(document).ready(function() {
+		init();
+	});
 	</script>
 
 </body>

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Simple Chatroom by Firebase</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="author" content="Paolovelove">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+	<link href="style.css" rel="stylesheet">
+	<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+	<!--[if lt IE 9]>
+	<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+	<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+	<![endif]-->
+</head>
+
+<body>
+
+<div class="container">
+	<div class="header clearfix">
+		<nav>
+			<ul class="nav nav-pills pull-right">
+				<li role="presentation"><a href="https://github.com/paolovelove/Chatroom-Firebase" target="_blank">Github</a></li>
+				<li role="presentation"><a href="https://firebase.google.com/" target="_blank">Firebase</a></li>
+			</ul>
+		</nav>
+		<h3 class="text-muted">Simple Chatroom <small>by Firebase</small></h3>
+	</div>
+
+	<div class="jumbotron hidden" id="status">
+		<h2>You are logged in!</h2>
+		<hr>
+		<p><a class="btn btn-primary" href="./index.html" role="button">Go to chatroom!</a></p>
+		<p><a class="btn btn-danger" href="javascript:void(0);" onclick="logout()" role="button">Logout</a></p>
+	</div>
+
+	<div class="panel panel-info hidden" id="form-panel">
+		<div class="panel-heading">
+			<h3 class="panel-title">Login & Register</h3>
+		</div>
+		<div class="panel-body">
+			<div class="row">
+				<div class="col-sm-12">
+					<form class="form-horizontal" id="form">
+						<div class="form-group">
+							<label for="email" class="col-sm-3 control-label">Email</label>
+							<div class="col-sm-8">
+								<input type="email" class="form-control" id="email" placeholder="Email" required>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="password" class="col-sm-3 control-label">Password</label>
+							<div class="col-sm-8">
+								<input type="password" class="form-control" id="password" placeholder="Password" required>
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="col-sm-offset-3 col-sm-8">
+								<button class="btn btn-primary" onclick="login(event);">Login</button>
+								<button class="btn btn-success" onclick="register(event);">Register</button>
+								<button class="btn btn-warning" onclick="forgetPassword(event);">Forget Password</button>
+							</div>
+						</div>
+						<hr>
+						<div class="form-group">
+							<div class="col-sm-offset-3 col-sm-8">
+								<button class="btn btn-google" onclick="googleLogin(event);">Google Sign in</button>
+							</div>
+						</div>
+					</form>
+				</div>
+
+			</div>
+
+		</div>
+	</div>
+
+
+	<footer class="footer">
+		<p>&copy; 2017 Chalermpon Thongmotai</p>
+	</footer>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+<script src="https://www.gstatic.com/firebasejs/4.5.0/firebase.js"></script>
+<script src="firebaseConfig.js"></script>
+<script>
+	firebase.initializeApp(config);
+	var auth = firebase.auth();
+
+	function formCheck(){
+		var $form = $('#form');
+		if(!$form[0].checkValidity())
+			alert("Incorrect email or password!")
+		return $form[0].checkValidity();
+		
+	}
+
+	function logout() {
+		auth.signOut();
+	}
+
+	function login(e) {
+		e.preventDefault();
+		if(formCheck()){
+			var email = $('#email').val();
+			var password = $('#password').val();
+			$('#password').val('');
+			auth.signInWithEmailAndPassword(email, password).catch(function(error) {
+				var errorCode = error.code;
+				var errorMessage = error.message;
+				alert(errorMessage);
+				console.log(error);
+			});
+		}
+	}
+
+	function register(e) {
+		e.preventDefault();
+		if(formCheck()){
+			var email = $('#email').val();
+			var password = $('#password').val();
+			$('#password').val('');
+			auth.createUserWithEmailAndPassword(email, password).catch(function(error) {
+				var errorCode = error.code;
+				var errorMessage = error.message;
+				alert(errorMessage);
+				console.log(error);
+			});
+		}
+	}
+
+	function forgetPassword(e) {
+		e.preventDefault();
+		var email = $('#email').val();
+		$('#password').val('');
+
+		auth.sendPasswordResetEmail(email).then(function() {
+		alert('Password Reset Email Sent!');
+		}).catch(function(error) {
+			var errorCode = error.code;
+			var errorMessage = error.message;
+			alert(errorMessage);
+			console.log(error);
+		});
+	}
+
+	function googleLogin(e) {
+		if (!auth.currentUser) {
+			var provider = new firebase.auth.GoogleAuthProvider();
+			auth.signInWithPopup(provider).catch(function(error) {
+			  	var errorCode = error.code;
+			  	var errorMessage = error.message;
+				alert(errorMessage);
+				console.log(error);
+			});
+		}
+	}
+
+	function init() {
+		auth.onAuthStateChanged(function(user) {
+			if (user) {
+				$('#status').removeClass('hidden');
+				$('#form-panel').addClass('hidden');
+				// window.location.replace("index.html"); 
+			}
+			else {
+				$('#status').addClass('hidden');
+				$('#form-panel').removeClass('hidden');
+			}
+		});
+	}
+	$(document).ready(function() {
+		init();
+	});
+</script>
+
+</body>
+</html>
